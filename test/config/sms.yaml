@@ -1,0 +1,33 @@
+service:
+    path_pidfile: ./test/logs/
+    time: 10
+    start_timeout: 10
+
+phones:
+    authorized: ['+34666666666', '5087']
+    alerts: ['+34666666666']
+
+commands:
+    reboot_modem:
+        msg:
+            started: 'Rebooting modem'
+            finished: 'Modem rebooted'
+            error: 'Error rebooting modem'
+        cli: ['zte_reboot']
+    reboot_computer:
+        msg:
+            started: 'Rebooting computer'
+            error: 'Error rebooting computer'
+        cli: ['computer_reboot']
+    connect_vpn:
+        msg:
+            started: 'Connecting VPN OAG'
+            finished: 'VPN OAG connected'
+            error: 'Error connecting VPN OAG'
+        cli: ['systemctl', 'restart', 'openvpn@oag']
+    update_dns:
+        msg:
+            started: 'Updating DNS'
+            finished: 'DNS updated'
+            error: 'Error updating DNS'
+        cli: ['update-public-ip']

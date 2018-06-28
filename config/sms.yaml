@@ -1,0 +1,42 @@
+service:
+    path_pidfile: /var/run/buoy/
+    time: 60
+    start_timeout: 10
+
+phones:
+    authorized: ['+34666666666', '5087', '+34666666667', '5020']
+    alerts: ['+34666666666']
+
+commands:
+    reboot_modem:
+        msg:
+            started: 'Rebooting modem'
+            error: 'Error rebooting modem'
+        cli: ['reboot-dongle']
+    reboot_computer:
+        msg:
+            started: 'Rebooting computer'
+            error: 'Error rebooting computer'
+        cli: ['systemctl', 'reboot']
+    update_dns:
+        msg:
+            started: 'Updating DNS'
+            finished: 'DNS updated'
+            error: 'Error updating DNS'
+        cli: ['systemctl', 'restart', 'ddclient']
+    reset_reverse_ssh:
+        msg:
+            started: 'Reset reverse ssh'
+            finished: 'Reverse ssh restarted'
+            error: 'Error resetting reverse ssh'
+        cli: ['systemctl', 'restart', 'reverse-ssh']
+    restart_weather_station:
+        msg:
+            started: 'Restarting daemon weather-station'
+            error: 'Error restarting daemon weather-station'
+        cli: ['systemctl', 'restart', 'weather-station.service']
+    restart_currentmeter:
+        msg:
+            started: 'Restarting daemon currentmeter'
+            error: 'Error restarting daemon currentmeter'
+        cli: ['systemctl', 'restart', 'current-meter.service']
