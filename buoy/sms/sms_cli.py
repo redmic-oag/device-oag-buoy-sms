@@ -113,7 +113,7 @@ class SMSCliDaemon(Daemon):
 
     @staticmethod
     def need_confirm(command):
-        return 'finish' in command['msg']
+        return 'finished' in command['msg']
 
     @staticmethod
     def delete_sms(sms_id):

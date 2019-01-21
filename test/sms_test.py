@@ -69,13 +69,13 @@ class TestSMSCli(unittest.TestCase):
             self.assertRaises(UnrecognizedCommandException, sms_cli.get_command, k)
 
     def test_should_returnTrue_when_commandNeedCofirmMessage(self):
-        for cmd in ['reboot_modem', 'reboot_computer']:
+        for cmd in ['reboot_computer']:
             cmd = self.sms_config['commands'][cmd]
             ok_(not SMSCliDaemon.need_confirm(cmd))
 
-        for cmd in ['connect_vpn', 'update_dns']:
+        for cmd in ['reboot_modem', 'connect_vpn', 'update_dns']:
             cmd = self.sms_config['commands'][cmd]
-            ok_(not SMSCliDaemon.need_confirm(cmd))
+            ok_(SMSCliDaemon.need_confirm(cmd))
 
     @unittest.skip("Necesario corregir")
     @patch('buoy.sms.sms_cli.check_call', return_value=0)
