@@ -77,6 +77,62 @@ class TestSMSCli(unittest.TestCase):
             cmd = self.sms_config['commands'][cmd]
             ok_(SMSCliDaemon.need_confirm(cmd))
 
+    def test_ad(self):
+        sms_cli = FakeSMSCliDaemon()
+        sms_cli.commands = self.sms_config['commands']
+        cli_expected = 'ls -la /var/log/buoy'
+        content = 'exec ' + cli_expected
+        cmd = sms_cli.get_command(content)
+
+        ok_(cmd['cli'] == cli_expected)
+
+    def test_should_substituteVarsInMessage_when_commandStartedMsgHasVars(self):
+        sms_cli = FakeSMSCliDaemon()
+        sms_cli.send_sms = MagicMock(return_value=None)
+        sms = {'id': 1,
+               'number': '+34660045151',
+               'content': 'reboot_computer',
+               'command': {
+                   'msg': {
+                       'started': 'Rebooting modem: {command_cli}',
+                       'finished': 'Modem rebooted: {ouput}',
+                       'error': 'Error rebooting modem'
+                   },
+                   'cli': 'zte_reboot'
+               }
+               }
+        sms_flat = sms_cli.flatten(sms)
+
+        msg_expected = sms['command']['msg']['started'].format(**sms_flat)
+
+        sms_cli.send_confirm_started(sms)
+        ok_(sms_cli.send_sms.call_args == ((sms['number'], msg_expected), ))
+
+    def test_should_substituteVarsInMessage_when_commandFinishedMsgHasVars(self):
+        sms_cli = FakeSMSCliDaemon()
+        sms_cli.send_sms = MagicMock(return_value=None)
+        output = "127.0.0.1"
+        sms = {'id': 1,
+               'number': '+34660045151',
+               'content': 'reboot_computer',
+               'command': {
+                   'msg': {
+                       'started': 'Getting public IP',
+                       'finished': 'Public IP: {command_output}',
+                       'error': 'Error getting public IP'
+                   },
+                   'cli': 'zte_reboot',
+                   'output': output
+
+               }
+               }
+
+        sms_flat = sms_cli.flatten(sms)
+        msg_expected = sms['command']['msg']['finished'].format(**sms_flat)
+
+        sms_cli.send_confirm_endend(sms)
+        ok_(sms_cli.send_sms.call_args == ((sms['number'], msg_expected), ))
+
     @unittest.skip("Necesario corregir")
     @patch('buoy.sms.sms_cli.check_call', return_value=0)
     def test_should_sendVarious_notifications_whenReceivedVariousSms(self, mock_check_call):

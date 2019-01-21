@@ -28,6 +28,17 @@ commands:
     update_dns:
         msg:
             started: 'Updating DNS'
-            finished: 'DNS updated'
+            finished: 'DNS updated {command_output}'
             error: 'Error updating DNS'
         cli: ['update-public-ip']
+    public_ip:
+        msg:
+            started: 'Getting public IP'
+            finished: 'Public IP: {command_output}'
+            error: 'Error getting public IP'
+        cli: ['public-ip']
+    exec:
+        msg:
+            started: 'Executing command: {command_cli}'
+            finished: 'Command executed: {command_output}'
+            error: 'Error executing command: {command_cli}'
