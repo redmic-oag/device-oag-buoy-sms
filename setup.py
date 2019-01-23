@@ -23,11 +23,11 @@ setup(
     long_description='This service allow execute commands send by SMS',
 
     # The project's main homepage.
-    url='http://git.redmic.net/oag/buoy',
+    url='https://gitlab.com/redmic-project/device/oag-buoy/sms',
 
     # Author details
-    author='Observatorio Ambiental Granadilla',
-    author_email='nacho@oag-fundacion.org',
+    author='Repositorio de Datos Marinos Integrados de Canarias',
+    author_email='info@redmic.es',
 
     # Choose your license
     license='MIT',
