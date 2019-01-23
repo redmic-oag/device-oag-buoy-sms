@@ -7,24 +7,20 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from os import path
 
-from pypandoc import convert_text
 from setuptools import setup, find_packages
 
 here = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file
-long_description = convert_text(path.join(here, 'README.md'), to='rst', format='md')
-
 setup(
-    name='Buoy-SMS-cli',
+    name='SMS-cli',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.1',
 
-    description='Scientific buoy - Multidevice',
-    long_description=long_description,
+    description='Service read SMS and execute commands',
+    long_description='This service allow execute commands sende by SMS',
 
     # The project's main homepage.
     url='http://git.redmic.net/oag/buoy',
