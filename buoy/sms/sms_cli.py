@@ -8,9 +8,9 @@ from subprocess import DEVNULL, STDOUT, check_output, CalledProcessError
 
 from flatten_dict import flatten
 
-import buoy.sms.utils.config as load_config
-from buoy.sms.service.daemon import Daemon
-from buoy.sms.utils.argsparse import is_valid_file
+import buoy.lib.utils.config as load_config
+from buoy.lib.service.daemon import Daemon
+from buoy.lib.utils.argsparse import is_valid_file
 
 DAEMON_NAME = 'sms-cli'
 

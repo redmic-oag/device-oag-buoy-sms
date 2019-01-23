@@ -36,5 +36,5 @@ publishing:
     - pip install twine
   script:
     - >
-      twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+      twine upload dist/*
       --username ${PYPI_USERNAME} --password ${PYPI_PASSWORD}

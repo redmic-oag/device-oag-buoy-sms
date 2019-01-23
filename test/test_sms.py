@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock, call
-from buoy.sms.utils.config import load_config
+from buoy.lib.utils.config import load_config
 from buoy.sms.sms_cli import SMSCliDaemon, UnrecognizedCommandException, UnauthorizedPhoneNumberException
 
 from nose.tools import ok_, eq_
