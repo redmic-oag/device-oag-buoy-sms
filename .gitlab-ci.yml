@@ -1,9 +1,11 @@
 stages:
   - test
   - package
+  - publish
+
+image: python:3.6
 
 testing:
-  image: python:3.6
   stage: test
   variables:
     PIP_CACHE_DIR: "${CI_PROJECT_DIR}/pip-cache"
@@ -12,9 +14,8 @@ testing:
   script:
     - nosetests
 
-building:
-  image: python:3.6
-  stage: test
+packaging:
+  stage: package
   variables:
     PIP_CACHE_DIR: "${CI_PROJECT_DIR}/pip-cache"
   before_script:
@@ -27,9 +28,8 @@ building:
     paths:
       - dist/*
 
-publish:
-  image: python:3.6
-  stage: build
+publishing:
+  stage: publish
   variables:
     PIP_CACHE_DIR: "${CI_PROJECT_DIR}/pip-cache"
   before_script:
