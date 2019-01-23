@@ -31,10 +31,7 @@ def load_config_device_serial(device_name, path_config='/etc/buoy/device.yaml'):
     return config['device'][device_name]['serial']
 
 
-def load_config_logger(filename, path_config='/etc/buoy/logging.yaml'):
+def load_config_logger(path_config='/etc/buoy/logging.yaml'):
     config = load_config(path_config=path_config)
-
-    filename += '.log'
-    config['handlers']['file']['filename'] = path.join(config['handlers']['file']['filename'], filename)
 
     return config

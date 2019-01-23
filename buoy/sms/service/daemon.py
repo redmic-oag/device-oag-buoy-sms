@@ -112,10 +112,11 @@ class Daemon(PID):
         pass
 
     def _stop(self, code=EX_OK):
-        self._active = False
-        self._before_stop()
-        self.remove_pid_file()
-        sys.exit(code)
+        if self.is_active():
+            self._active = False
+            self._before_stop()
+            self.remove_pid_file()
+            sys.exit(code)
 
     def stop(self):
         logger.info("Stop service")

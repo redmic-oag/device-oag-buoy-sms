@@ -12,14 +12,7 @@ handlers:
         level: INFO
         formatter: simple
         stream: ext://sys.stdout
-    file:
-        class: logging.handlers.TimedRotatingFileHandler
-        level: INFO
-        formatter: detail
-        when: midnight
-        backupCount: 4
-        filename: ./test/logs/
 
 root:
     level: INFO
-    handlers: [console, file]
+    handlers: [console]
