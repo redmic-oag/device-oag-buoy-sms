@@ -19,8 +19,8 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.1',
 
-    description='Service read SMS and execute commands',
-    long_description='This service allow execute commands sende by SMS',
+    description='Service execute commands send by SMS',
+    long_description='This service allow execute commands send by SMS',
 
     # The project's main homepage.
     url='http://git.redmic.net/oag/buoy',
