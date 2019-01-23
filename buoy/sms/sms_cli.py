@@ -4,12 +4,13 @@
 import logging.config
 import time
 from argparse import ArgumentParser
-
-from buoy.lib.utils.argsparse import is_valid_file
-import buoy.lib.utils.config as load_config
-from buoy.lib.service.daemon import Daemon
 from subprocess import DEVNULL, STDOUT, check_output, CalledProcessError
+
 from flatten_dict import flatten
+
+import buoy.sms.utils.config as load_config
+from buoy.sms.service.daemon import Daemon
+from buoy.sms.utils.argsparse import is_valid_file
 
 DAEMON_NAME = 'sms-cli'
 
@@ -43,42 +44,55 @@ class NotExistsCommandException(Exception):
         self.command = command
 
 
+class NotExecutionCommand(Exception):
+    def __init__(self, command: str, code):
+        SMSExceptionBase.__init__(self, message="Error executed command - {command} - Return code: {code}")
+        self.command = command
+        self.code = code
+
+
 class SMSCliDaemon(Daemon):
     def __init__(self, config):
-        Daemon.__init__(self,  daemon_name=DAEMON_NAME, daemon_config=config['service'])
+        Daemon.__init__(self, daemon_name=DAEMON_NAME, daemon_config=config['service'])
 
         conf = config['service']
         self.time = conf['time']
         self.commands = config['commands']
         self.authorized_phones = set(config['phones']['authorized'])
         self.alerts_phones = set(config['phones']['alerts'])
+        self.preffix_custom_cmd = "exec "
 
     def run(self):
-        while self.is_active:
-            for sms in self.get_sms_unread():
+        while self.is_active():
+            messages = self.get_sms_unread()
+            for sms in messages:
+                self.delete_sms(sms['id'])
                 try:
-                    logger.info("Phone %(number) - Content %(content)", sms)
-                    if self.is_authorized_phone(sms['number']):
-                        sms['command'] = self.get_command(sms['content'])
-                        self.send_confirm_started(sms)
-                        try:
-                            sms['command']['output'] = check_output(sms['command']['cli'], stdout=DEVNULL,
-                                                                    stderr=STDOUT).decode('UTF-8')
-                        except CalledProcessError as ex:
-                            raise NotExistsCommandException(sms['content'])
-
-                        if self.need_confirm(sms['command']):
-                            self.send_confirm_endend(sms)
-                    else:
-                        raise UnauthorizedPhoneNumberException(sms['number'])
+                    #                    logger.info("Phone %(number) - Content %(content)", sms)
+                    self.check_authorized_phone(sms['number'])
+                    sms['command'] = self.get_command(sms['content'])
+                    self.send_confirm_started(sms)
+                    self.exectution_command(sms)
+                    if self.need_confirm(sms['command']):
+                        self.send_confirm_endend(sms)
 
                 except SMSExceptionBase as ex:
                     ex.phone = sms['number']
                     self.send_error(ex)
                     pass
-                self.delete_sms(sms['id'])
 
             time.sleep(self.time)
+
+    @staticmethod
+    def exectution_command(sms):
+        try:
+            sms['command']['output'] = check_output(sms['command']['cli'], stdout=DEVNULL,
+                                                    stderr=STDOUT)
+        except CalledProcessError as ex:
+            if ex.returncode == 127:
+                raise NotExistsCommandException(sms['content'])
+            else:
+                raise NotExecutionCommand(sms['content'], code=ex.returncode)
 
     def get_sms_unread(self):
         import vodem.simple
@@ -87,33 +101,33 @@ class SMSCliDaemon(Daemon):
         except Exception as e:
             self.error()
 
-    def is_authorized_phone(self, number):
+    def check_authorized_phone(self, number):
         if number in self.authorized_phones:
             return True
 
-    def get_command(self, content):
-        preffix = "exec "
-        if content in self.commands:
-            cmd = self.commands[content]
-        elif content.startswith(preffix):
-            cmd = self.commands[preffix[:-1]]
-            cmd['cli'] = content[len(preffix):]
+        raise UnauthorizedPhoneNumberException(number)
 
-        if cmd:
-            return cmd
+    def get_command(self, cmd_key):
+        if cmd_key in self.commands:
+            cmd = self.commands[cmd_key]
+        elif cmd_key.startswith(self.preffix_custom_cmd):
+            cmd = self.commands[self.preffix_custom_cmd[:-1]]
+            cmd['cli'] = cmd_key[len(self.preffix_custom_cmd):]
+        else:
+            raise UnrecognizedCommandException(command=cmd_key)
 
-        raise UnrecognizedCommandException(command=content)
+        return cmd
 
     def send_confirm_started(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['started'].format(**sms_flat)
-        logger.info("Run %s - %s", sms['number'], msg)
+        #        logger.info("Run %s - %s", sms['number'], msg)
         self.send_sms(sms['number'], msg)
 
     def send_confirm_endend(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['finished'].format(**sms_flat)
-        logger.info("Run %s - %s", sms['number'], msg)
+        #        logger.info("Run %s - %s", sms['number'], msg)
         self.send_sms(sms['number'], msg)
 
     def send_error(self, exception: SMSExceptionBase):
@@ -123,12 +137,6 @@ class SMSCliDaemon(Daemon):
     @staticmethod
     def need_confirm(command):
         return 'finished' in command['msg']
-
-    @staticmethod
-    def delete_sms(sms_id):
-        import vodem.simple
-        logger.info("Delete SMS with id value %s", sms_id)
-        vodem.simple.sms_delete(sms_id)
 
     @staticmethod
     def send_sms(phone, msg):
@@ -143,7 +151,10 @@ class SMSCliDaemon(Daemon):
             else:
                 return k1 + "_" + k2
 
-        return flatten(d, reducer=underscore_reducer)
+        f = flatten(d, reducer=underscore_reducer)
+        if isinstance(f['command_cli'], list):
+            f['command_cli'] = " ".join(f['command_cli'])
+        return f
 
 
 def run(config: str, config_log_file: str):
