@@ -55,7 +55,7 @@ setup(
     # What does your project relate to?
     keywords='sms command',
 
-    namespace_packages=['buoy'],
+    namespace_packages=['sms'],
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
@@ -68,7 +68,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['pypandoc', 'PyYAML', 'pypandoc'],
+    install_requires=['pypandoc', 'PyYAML', 'pypandoc', 'Buoy-Lib'],
     setup_requires=['pytest-runner', 'wheel', 'twine'],
 
     # List additional groups of dependencies here (e.g. development

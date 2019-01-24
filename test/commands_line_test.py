@@ -1,7 +1,7 @@
 import unittest
 from os import EX_OSERR
 
-from buoy.sms.sms_cli import run as sms_server
+from sms.sms_cli import run as sms_server
 
 
 config_sms_file = "./test/config/sms.yaml"

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock, call
 from buoy.lib.utils.config import load_config
-from buoy.sms.sms_cli import SMSCliDaemon, UnrecognizedCommandException, UnauthorizedPhoneNumberException
+from sms.sms_cli import SMSCliDaemon, UnrecognizedCommandException, UnauthorizedPhoneNumberException
 
 from nose.tools import ok_, eq_
 
@@ -51,7 +51,7 @@ class SMSIntegrationTests(unittest.TestCase):
         if skip_test:
             self.skipTest("Skip BaseTest tests, it's a base class")
 
-    @patch('buoy.sms.sms_cli.check_output')
+    @patch('sms.sms_cli.check_output')
     def test_should_sendSMS_whenReceiveSMS(self, mock_check_output):
         sms_sended_expected = []
         executions = []
