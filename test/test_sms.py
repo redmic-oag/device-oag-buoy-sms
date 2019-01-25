@@ -1,16 +1,16 @@
 import unittest
 from unittest.mock import patch, MagicMock, call
 from buoy.lib.utils.config import load_config
-from sms.sms_cmd import SMSCliDaemon, UnrecognizedCommandException, UnauthorizedPhoneNumberException
+from sms.sms_cmd import SMSCMDDaemon, UnrecognizedCommandException, UnauthorizedPhoneNumberException
 
 from nose.tools import ok_, eq_
 
 config_file = "test/config/sms.yaml"
 
 
-class FakeSMSCliDaemon(SMSCliDaemon):
+class FakeSMSCliDaemon(SMSCMDDaemon):
     def __init__(self, **kwargs):
-        SMSCliDaemon.__init__(self, config=load_config(path_config=config_file))
+        SMSCMDDaemon.__init__(self, config=load_config(path_config=config_file))
         self.sms_received = kwargs.pop('sms_received', [])
         self._active = True
 
