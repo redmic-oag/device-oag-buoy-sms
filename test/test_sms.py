@@ -8,7 +8,7 @@ from nose.tools import ok_, eq_
 config_file = "test/config/sms.yaml"
 
 
-class FakeSMSCliDaemon(SMSCMDDaemon):
+class FakeSMSCMDDaemon(SMSCMDDaemon):
     def __init__(self, **kwargs):
         SMSCMDDaemon.__init__(self, config=load_config(path_config=config_file))
         self.sms_received = kwargs.pop('sms_received', [])
@@ -51,7 +51,7 @@ class SMSIntegrationTests(unittest.TestCase):
         if skip_test:
             self.skipTest("Skip BaseTest tests, it's a base class")
 
-    @patch('sms.sms_cli.check_output')
+    @patch('sms.sms_cmd.check_output')
     def test_should_sendSMS_whenReceiveSMS(self, mock_check_output):
         sms_sended_expected = []
         executions = []
@@ -64,7 +64,7 @@ class SMSIntegrationTests(unittest.TestCase):
 
         mock_check_output.side_effect = executions
 
-        sms_cli = FakeSMSCliDaemon(sms_received=self.sms_received)
+        sms_cli = FakeSMSCMDDaemon(sms_received=self.sms_received)
         sms_cli.time = 0.2
         sms_cli.send_sms = MagicMock(return_value=None)
 
@@ -129,27 +129,27 @@ class TestSMSCli(unittest.TestCase):
 
     def test_should_returnTrue_when_isAuthorizedPhoneNumber(self):
 
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
         authorized_phones = ['+34666666666', '5087']
         for phone in authorized_phones:
             ok_(sms_cli.check_authorized_phone(phone))
 
     def test_should_throwUnauthorizedPhoneNumberException_when_isUnauthorizedPhoneNumber(self):
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
         no_authorized_phones = ['+34666666667', '3217']
 
         for phone in no_authorized_phones:
             self.assertRaises(UnauthorizedPhoneNumberException, sms_cli.check_authorized_phone, phone)
 
     def test_shuold_returnCommand_when_validKey(self):
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
         config = load_config(path_config=config_file)
 
         for k, v in config['commands'].items():
             eq_(sms_cli.get_command(k), v)
 
     def test_shuold_throwUnrecognizedCommandException_when_invalidKey(self):
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
 
         for k in ['no_key', 'reboot_ra']:
             self.assertRaises(UnrecognizedCommandException, sms_cli.get_command, k)
@@ -158,14 +158,14 @@ class TestSMSCli(unittest.TestCase):
         config = load_config(path_config=config_file)
         for cmd in ['reboot_computer']:
             cmd = config['commands'][cmd]
-            ok_(not SMSCliDaemon.need_confirm(cmd))
+            ok_(not SMSCMDDaemon.need_confirm(cmd))
 
         for cmd in ['exec', 'restart_currentmeter', 'update_dns']:
             cmd = config['commands'][cmd]
-            ok_(SMSCliDaemon.need_confirm(cmd))
+            ok_(SMSCMDDaemon.need_confirm(cmd))
 
     def test_should_returnCustomCmd_when_sendSMSwithExecCmd(self):
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
         cli_expected = 'ls -la /var/log/buoy'
         content = 'exec ' + cli_expected
         cmd = sms_cli.get_command(content)
@@ -173,7 +173,7 @@ class TestSMSCli(unittest.TestCase):
         ok_(cmd['cli'] == cli_expected)
 
     def test_should_substituteVarsInMessage_when_commandStartedMsgHasVars(self):
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
         sms_cli.send_sms = MagicMock(return_value=None)
         sms = {'id': 1,
                'number': '+34660045151',
@@ -195,7 +195,7 @@ class TestSMSCli(unittest.TestCase):
         ok_(sms_cli.send_sms.call_args == ((sms['number'], msg_expected), ))
 
     def test_should_substituteVarsInMessage_when_commandFinishedMsgHasVars(self):
-        sms_cli = FakeSMSCliDaemon()
+        sms_cli = FakeSMSCMDDaemon()
         sms_cli.send_sms = MagicMock(return_value=None)
         output = "127.0.0.1"
         sms = {'id': 1,
