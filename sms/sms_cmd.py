@@ -12,7 +12,7 @@ import buoy.lib.utils.config as load_config
 from buoy.lib.service.daemon import Daemon
 from buoy.lib.utils.argsparse import is_valid_file
 
-DAEMON_NAME = 'sms-cli'
+DAEMON_NAME = 'sms-cmd'
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class NotExecutionCommand(Exception):
         self.code = code
 
 
-class SMSCliDaemon(Daemon):
+class SMSCMDDaemon(Daemon):
     def __init__(self, config):
         Daemon.__init__(self, daemon_name=DAEMON_NAME, daemon_config=config['service'])
 
@@ -161,7 +161,7 @@ def run(config: str, config_log_file: str):
     logging.config.dictConfig(load_config.load_config_logger(path_config=config_log_file))
     buoy_config = load_config.load_config(path_config=config)
 
-    daemon = SMSCliDaemon(config=buoy_config)
+    daemon = SMSCMDDaemon(config=buoy_config)
     daemon.start()
 
 
