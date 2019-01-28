@@ -27,14 +27,3 @@ packaging:
     expire_in: '6 months'
     paths:
       - dist/*
-
-publishing:
-  stage: publish
-  variables:
-    PIP_CACHE_DIR: "${CI_PROJECT_DIR}/pip-cache"
-  before_script:
-    - pip install twine
-  script:
-    - >
-      twine upload dist/*
-      --username ${PYPI_USERNAME} --password ${PYPI_PASSWORD}
