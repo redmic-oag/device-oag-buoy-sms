@@ -68,7 +68,7 @@ class SMSCMDDaemon(Daemon):
             for sms in messages:
                 self.delete_sms(sms['id'])
                 try:
-                    #                    logger.info("Phone %(number) - Content %(content)", sms)
+                    logger.info("Phone: " + sms['number'] + "- Content: " + sms['content'])
                     self.check_authorized_phone(sms['number'])
                     sms['command'] = self.get_command(sms['content'])
                     self.send_confirm_started(sms)
@@ -121,13 +121,13 @@ class SMSCMDDaemon(Daemon):
     def send_confirm_started(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['started'].format(**sms_flat)
-        #        logger.info("Run %s - %s", sms['number'], msg)
+        logger.info("Run " + msg + " " + msg)
         self.send_sms(sms['number'], msg)
 
     def send_confirm_endend(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['finished'].format(**sms_flat)
-        #        logger.info("Run %s - %s", sms['number'], msg)
+        logger.info("Run " + msg + " " + msg)
         self.send_sms(sms['number'], msg)
 
     def send_error(self, exception: SMSExceptionBase):
@@ -170,7 +170,7 @@ def main():
     parser.add_argument("--config-file", help="Ruta al fichero de configuración del servicio",
                         default='/etc/buoy/sms.yaml', type=is_valid_file)
     parser.add_argument("--config-log-file", help="Ruta al fichero de configuración de los logs",
-                        default='/etc/buoy/logging.yaml', type=is_valid_file)
+                        default='/etc/buoy/logging-sms.yaml', type=is_valid_file)
     args = parser.parse_args()
 
     run(config=args.config_file, config_log_file=args.config_log_file)
