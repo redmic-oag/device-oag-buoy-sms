@@ -104,7 +104,7 @@ setup(
     entry_points={
         'console_scripts': [
             # Servicio SMS
-            'sms-cmd=buoy.sms.sms_cmd:main'
+            'sms-cmd=sms.sms_cmd:main'
         ],
     },
 )
