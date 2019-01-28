@@ -5,13 +5,10 @@ https://github.com/pypa/sampleproject
 """
 
 # Always prefer setuptools over distutils
-from os import path
 import glob
 from setuptools import setup, find_packages
 
-here = path.abspath(path.dirname(__file__))
-script_files = glob.glob('scritps/**/*', recursive=True)
-
+script_files = glob.glob('scripts/**/*.*', recursive=True)
 
 setup(
     name='SMS-Cmd',
@@ -70,7 +67,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['pypandoc', 'PyYAML', 'pypandoc', 'Buoy-Lib'],
+    install_requires=['PyYAML', 'pypandoc', 'Buoy-Lib'],
     setup_requires=['pytest-runner', 'wheel', 'twine'],
 
     # List additional groups of dependencies here (e.g. development
