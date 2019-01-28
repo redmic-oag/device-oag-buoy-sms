@@ -17,9 +17,9 @@ class FakeSMSCMDDaemon(SMSCMDDaemon):
     def get_sms_unread(self):
         return self.sms_received.copy()
 
-    def delete_sms(self, sms_id):
+    def delete_sms(self, sms_in):
         for index, sms in enumerate(self.sms_received):
-            if sms['id'] == sms_id:
+            if sms['id'] == sms_in['id']:
                 self.sms_received.pop(index)
                 break
 
@@ -27,7 +27,7 @@ class FakeSMSCMDDaemon(SMSCMDDaemon):
             self._active = False
 
 
-class SMSIntegrationTests(unittest.TestCase):
+class SMSIntegrationSimulateCMDTests(unittest.TestCase):
     item_class = None
     db_conf = None
     data = None
@@ -37,12 +37,12 @@ class SMSIntegrationTests(unittest.TestCase):
     def setUpClass(cls):
         global skip_test
 
-        if cls is SMSIntegrationTests:
+        if cls is SMSIntegrationSimulateCMDTests:
             skip_test = True
         else:
             skip_test = False
 
-        super(SMSIntegrationTests, cls).setUpClass()
+        super(SMSIntegrationSimulateCMDTests, cls).setUpClass()
 
     def setUp(self):
         """ Module level set-up called once before any tests in this file are executed. Creates a temporary database
@@ -73,52 +73,110 @@ class SMSIntegrationTests(unittest.TestCase):
         ok_(sms_cli.send_sms.call_args_list == sms_sended_expected)
 
 
-class TestCommandOK(SMSIntegrationTests):
+class SMSIntegrationRunCMDTests(unittest.TestCase):
+    item_class = None
+    db_conf = None
+    data = None
+    skip_test = False
+
+    @classmethod
+    def setUpClass(cls):
+        global skip_test
+
+        if cls is SMSIntegrationRunCMDTests:
+            skip_test = True
+        else:
+            skip_test = False
+
+        super(SMSIntegrationRunCMDTests, cls).setUpClass()
+
+    def setUp(self):
+        """ Module level set-up called once before any tests in this file are executed. Creates a temporary database
+        and sets it up """
+
+        if skip_test:
+            self.skipTest("Skip BaseTest tests, it's a base class")
+
+    def test_should_sendSMS_whenReceiveSMS(self):
+        sms_sended_expected = []
+
+        for sms in self.sms_received:
+            if 'sms_sent' in sms:
+                sms_sended_expected += sms['sms_sent']
+
+        sms_cli = FakeSMSCMDDaemon(sms_received=self.sms_received)
+        sms_cli.time = 0.2
+        sms_cli.send_sms = MagicMock(return_value=None)
+
+        sms_cli.run()
+
+        ok_(sms_cli.send_sms.call_args_list == sms_sended_expected)
+
+
+class TestCommandOK(SMSIntegrationSimulateCMDTests):
     sms_received = [{'id': 1, 'number': '+34666666666', 'content': 'reboot_computer',
-                     'execution': '', 'sms_sent':
-                         [call('+34666666666', 'Rebooting computer - systemctl reboot')]
+                     'execution': b'', 'sms_sent':
+                         [call('+34666666666', 'Rebooting computer: systemctl reboot')]
                      }]
 
 
-class TestExecuteCommandOK(SMSIntegrationTests):
-    sms_received = [{'id': 2, 'number': '+34666666666', 'content': 'exec echo "hola"',
+class TestExecuteCommandOK(SMSIntegrationRunCMDTests):
+    sms_received = [{'id': 1, 'number': '+34666666666', 'content': 'exec echo "hola"',
+                    'sms_sent': [call('+34666666666', 'Executing command: echo "hola"'),
+                                 call('+34666666666', 'Command executed: hola\n')]
+                     }]
+
+
+class TestExecuteCommandKO(SMSIntegrationRunCMDTests):
+    sms_received = [{'id': 2, 'number': '+34666666666', 'content': 'exec echo "hola"; exit 1',
                      'execution': 'Hola', 'sms_sent':
-                         [call('+34666666666', 'Executing command - echo "hola"'),
-                          call('+34666666666', 'Command executed - Hola')]
+                         [call('+34666666666', 'Executing command: echo "hola"; exit 1'),
+                          call('+34666666666', 'Error executed command - exec echo "hola"; exit 1 - Return code: 1')]
                      }]
 
 
-class TestUnathorizedNumber(SMSIntegrationTests):
-    sms_received = [{'id': 3, 'number': '+34666666667', 'content': 'restart_currentmeter',
+class TestExecuteCommandNotExists(SMSIntegrationRunCMDTests):
+    sms_received = [{'id': 3, 'number': '+34666666666', 'content': 'exec lsaa',
+                     'execution': 'Hola', 'sms_sent':
+                         [call('+34666666666', 'Executing command: lsaa'),
+                          call('+34666666666', 'Not exists command exec lsaa')]
+                     }]
+
+
+class TestUnathorizedNumber(SMSIntegrationRunCMDTests):
+    sms_received = [{'id': 4, 'number': '+34666666667', 'content': 'restart_currentmeter',
                      'sms_sent':
                          [call('+34666666666', 'Unauthorized phone number +34666666667')]
                      }]
 
 
-class TestUnrecognizedCommand(SMSIntegrationTests):
-    sms_received = [{'id': 4, 'number': '+34666666666', 'content': 'connect_vpn',
-                     'execution': {'output': 'Hola', 'returncode': 127},
+class TestUnrecognizedCommand(SMSIntegrationRunCMDTests):
+    sms_received = [{'id': 5, 'number': '+34666666666', 'content': 'connect_vpn',
                      'sms_sent':
                          [call('+34666666666', 'Unrecognized command connect_vpn sent from +34666666666')]
                      }]
 
 
-class TestAllSMS(SMSIntegrationTests):
-    sms_received = [{'id': 1, 'number': '+34666666666', 'content': 'reboot_computer',
-                     'execution': '', 'sms_sent':
-                         [call('+34666666666', 'Rebooting computer - systemctl reboot')]
+class TestAllSMSRunCMD(SMSIntegrationRunCMDTests):
+    sms_received = [{'id': 1, 'number': '+34666666666', 'content': 'exec echo "hola"',
+                    'sms_sent': [call('+34666666666', 'Executing command: echo "hola"'),
+                                 call('+34666666666', 'Command executed: hola\n')]
                      },
-                    {'id': 2, 'number': '+34666666666', 'content': 'exec echo "hola"',
+                    {'id': 2, 'number': '+34666666666', 'content': 'exec echo "hola"; exit 1',
                      'execution': 'Hola', 'sms_sent':
-                         [call('+34666666666', 'Executing command - echo "hola"'),
-                          call('+34666666666', 'Command executed - Hola')]
+                         [call('+34666666666', 'Executing command: echo "hola"; exit 1'),
+                          call('+34666666666', 'Error executed command - exec echo "hola"; exit 1 - Return code: 1')]
                      },
-                    {'id': 3, 'number': '+34666666667', 'content': 'restart_currentmeter',
+                    {'id': 3, 'number': '+34666666666', 'content': 'exec lsaa',
+                     'execution': 'Hola', 'sms_sent':
+                         [call('+34666666666', 'Executing command: lsaa'),
+                          call('+34666666666', 'Not exists command exec lsaa')]
+                     },
+                    {'id': 4, 'number': '+34666666667', 'content': 'restart_currentmeter',
                      'sms_sent':
                          [call('+34666666666', 'Unauthorized phone number +34666666667')]
                      },
-                    {'id': 4, 'number': '+34666666666', 'content': 'connect_vpn',
-                     'execution': {'output': 'Hola', 'returncode': 127},
+                    {'id': 5, 'number': '+34666666666', 'content': 'connect_vpn',
                      'sms_sent':
                          [call('+34666666666', 'Unrecognized command connect_vpn sent from +34666666666')]
                      }

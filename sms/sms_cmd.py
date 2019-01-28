@@ -11,6 +11,7 @@ from flatten_dict import flatten
 import buoy.lib.utils.config as load_config
 from buoy.lib.service.daemon import Daemon
 from buoy.lib.utils.argsparse import is_valid_file
+import sys
 
 DAEMON_NAME = 'sms-cmd'
 
@@ -38,13 +39,13 @@ class UnauthorizedPhoneNumberException(SMSExceptionBase):
         self.phone = phone
 
 
-class NotExistsCommandException(Exception):
+class NotExistsCommandException(SMSExceptionBase):
     def __init__(self, command: str):
         SMSExceptionBase.__init__(self, message="Not exists command {command}")
         self.command = command
 
 
-class NotExecutionCommand(Exception):
+class NotExecutionCommand(SMSExceptionBase):
     def __init__(self, command: str, code):
         SMSExceptionBase.__init__(self, message="Error executed command - {command} - Return code: {code}")
         self.command = command
@@ -66,9 +67,9 @@ class SMSCMDDaemon(Daemon):
         while self.is_active():
             messages = self.get_sms_unread()
             for sms in messages:
-                self.delete_sms(sms['id'])
+                self.delete_sms(sms)
                 try:
-                    logger.info("Phone: " + sms['number'] + "- Content: " + sms['content'])
+                    logger.info("Phone: " + sms['number'] + " - Content: " + sms['content'])
                     self.check_authorized_phone(sms['number'])
                     sms['command'] = self.get_command(sms['content'])
                     self.send_confirm_started(sms)
@@ -80,14 +81,17 @@ class SMSCMDDaemon(Daemon):
                     ex.phone = sms['number']
                     self.send_error(ex)
                     pass
+                except BaseException as ex:
+                    logging.info(ex)
+                    self.error()
 
             time.sleep(self.time)
 
     @staticmethod
     def exectution_command(sms):
         try:
-            sms['command']['output'] = check_output(sms['command']['cli'], stdout=DEVNULL,
-                                                    stderr=STDOUT)
+            cmd = sms['command']['cli']
+            sms['command']['output'] = check_output(cmd, stderr=STDOUT, shell=True).decode("utf-8")
         except CalledProcessError as ex:
             if ex.returncode == 127:
                 raise NotExistsCommandException(sms['content'])
@@ -121,13 +125,13 @@ class SMSCMDDaemon(Daemon):
     def send_confirm_started(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['started'].format(**sms_flat)
-        logger.info("Run " + msg + " " + msg)
+        logger.info("Send confirmation started message'" + msg + "' to '" + sms['number'] + "'")
         self.send_sms(sms['number'], msg)
 
     def send_confirm_endend(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['finished'].format(**sms_flat)
-        logger.info("Run " + msg + " " + msg)
+        logger.info("Send finished endend message'" + msg + "' to '" + sms['number'] + "'")
         self.send_sms(sms['number'], msg)
 
     def send_error(self, exception: SMSExceptionBase):
@@ -142,6 +146,12 @@ class SMSCMDDaemon(Daemon):
     def send_sms(phone, msg):
         import vodem.simple
         vodem.simple.sms_send(phone, msg)
+
+    @staticmethod
+    def delete_sms(sms):
+        import vodem.simple
+        vodem.simple.sms_delete(sms['id'])
+        logging.info("SMS deleted: " + sms['content'])
 
     @staticmethod
     def flatten(d):
