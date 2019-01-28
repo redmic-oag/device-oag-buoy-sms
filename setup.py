@@ -67,7 +67,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['PyYAML', 'pypandoc', 'Buoy-Lib'],
+    install_requires=['PyYAML', 'Buoy-Lib'],
     setup_requires=['pytest-runner', 'wheel', 'twine'],
 
     # List additional groups of dependencies here (e.g. development
