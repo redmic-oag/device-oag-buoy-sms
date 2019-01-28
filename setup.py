@@ -5,33 +5,28 @@ https://github.com/pypa/sampleproject
 """
 
 # Always prefer setuptools over distutils
-from os import path
-
-from pypandoc import convert_text
+import glob
 from setuptools import setup, find_packages
 
-here = path.abspath(path.dirname(__file__))
-
-# Get the long description from the README file
-long_description = convert_text(path.join(here, 'README.md'), to='rst', format='md')
+script_files = glob.glob('scripts/**/*.*', recursive=True)
 
 setup(
-    name='Buoy-SMS-cli',
+    name='SMS-Cmd',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.1',
+    version='0.0.5',
 
-    description='Scientific buoy - Multidevice',
-    long_description=long_description,
+    description='Service execute commands send by SMS',
+    long_description='This service allow execute commands send by SMS',
 
     # The project's main homepage.
-    url='http://git.redmic.net/oag/buoy',
+    url='https://gitlab.com/redmic-project/device/oag-buoy/sms',
 
     # Author details
-    author='Observatorio Ambiental Granadilla',
-    author_email='nacho@oag-fundacion.org',
+    author='Repositorio de Datos Marinos Integrados de Canarias',
+    author_email='info@redmic.es',
 
     # Choose your license
     license='MIT',
@@ -42,7 +37,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -53,16 +48,13 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
 
     # What does your project relate to?
-    keywords='sample setuptools development',
+    keywords='sms command',
 
-    namespace_packages=['buoy'],
+    namespace_packages=['sms'],
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
@@ -75,8 +67,8 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['pypandoc', 'pyyaml'],
-    setup_requires=['pytest-runner'],
+    install_requires=['PyYAML', 'Buoy-Lib'],
+    setup_requires=['pytest-runner', 'wheel', 'twine'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -103,7 +95,8 @@ setup(
     # need to place data files outside of your packages. See:
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
     # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
-    data_files=[('/etc/buoy', ['config/sms.yaml'])],
+    data_files=[('/etc/buoy', ['config/sms.yaml']),
+                ('/etc', script_files)],
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
@@ -111,7 +104,7 @@ setup(
     entry_points={
         'console_scripts': [
             # Servicio SMS
-            'sms-cli=buoy.sms.sms_cli:main'
+            'sms-cmd=buoy.sms.sms_cmd:main'
         ],
     },
 )
