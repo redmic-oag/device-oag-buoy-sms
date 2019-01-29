@@ -36,11 +36,11 @@ commands:
             error: 'Error restarting daemon weather-station'
             finished: 'Daemon weather-station restarted'
         cli: ['systemctl', 'restart', 'weather-station.service']
-    restart_currentmeter:
+    restart_current_meter:
         msg:
-            started: 'Restarting daemon currentmeter: {command_cli}'
-            error: 'Error restarting daemon currentmeter'
-            finished: 'Daemon currentemeter restarted'
+            started: 'Restarting daemon current-meter: {command_cli}'
+            error: 'Error restarting daemon current-meter'
+            finished: 'Daemon current-meter restarted'
         cli: ['systemctl', 'restart', 'current-meter.service']
     public_ip:
         msg:

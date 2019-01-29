@@ -125,13 +125,13 @@ class SMSCMDDaemon(Daemon):
     def send_confirm_started(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['started'].format(**sms_flat)
-        logger.info("Send confirmation started message'" + msg + "' to '" + sms['number'] + "'")
+        logger.info("Send confirmation started message '" + msg + "' to '" + sms['number'] + "'")
         self.send_sms(sms['number'], msg)
 
     def send_confirm_endend(self, sms):
         sms_flat = self.flatten(sms)
         msg = sms['command']['msg']['finished'].format(**sms_flat)
-        logger.info("Send finished endend message'" + msg + "' to '" + sms['number'] + "'")
+        logger.info("Send finished endend message '" + msg + "' to '" + sms['number'] + "'")
         self.send_sms(sms['number'], msg)
 
     def send_error(self, exception: SMSExceptionBase):
