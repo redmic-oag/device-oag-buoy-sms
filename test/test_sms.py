@@ -27,7 +27,7 @@ class FakeSMSCMDDaemon(SMSCMDDaemon):
             self._active = False
 
 
-class SMSIntegrationSimulateCMDTests(unittest.TestCase):
+class SMSIntegrationBaseMDTests(unittest.TestCase):
     item_class = None
     db_conf = None
     data = None
@@ -37,12 +37,12 @@ class SMSIntegrationSimulateCMDTests(unittest.TestCase):
     def setUpClass(cls):
         global skip_test
 
-        if cls is SMSIntegrationSimulateCMDTests:
+        if cls is SMSIntegrationSimulateCMDTests or cls is SMSIntegrationRunCMDTests:
             skip_test = True
         else:
             skip_test = False
 
-        super(SMSIntegrationSimulateCMDTests, cls).setUpClass()
+        super(SMSIntegrationBaseMDTests, cls).setUpClass()
 
     def setUp(self):
         """ Module level set-up called once before any tests in this file are executed. Creates a temporary database
@@ -50,6 +50,9 @@ class SMSIntegrationSimulateCMDTests(unittest.TestCase):
 
         if skip_test:
             self.skipTest("Skip BaseTest tests, it's a base class")
+
+
+class SMSIntegrationSimulateCMDTests(SMSIntegrationBaseMDTests):
 
     @patch('sms.sms_cmd.check_output')
     def test_should_sendSMS_whenReceiveSMS(self, mock_check_output):
@@ -73,29 +76,7 @@ class SMSIntegrationSimulateCMDTests(unittest.TestCase):
         ok_(sms_cli.send_sms.call_args_list == sms_sended_expected)
 
 
-class SMSIntegrationRunCMDTests(unittest.TestCase):
-    item_class = None
-    db_conf = None
-    data = None
-    skip_test = False
-
-    @classmethod
-    def setUpClass(cls):
-        global skip_test
-
-        if cls is SMSIntegrationRunCMDTests:
-            skip_test = True
-        else:
-            skip_test = False
-
-        super(SMSIntegrationRunCMDTests, cls).setUpClass()
-
-    def setUp(self):
-        """ Module level set-up called once before any tests in this file are executed. Creates a temporary database
-        and sets it up """
-
-        if skip_test:
-            self.skipTest("Skip BaseTest tests, it's a base class")
+class SMSIntegrationRunCMDTests(SMSIntegrationBaseMDTests):
 
     def test_should_sendSMS_whenReceiveSMS(self):
         sms_sended_expected = []
@@ -218,7 +199,7 @@ class TestSMSCli(unittest.TestCase):
             cmd = config['commands'][cmd]
             ok_(not SMSCMDDaemon.need_confirm(cmd))
 
-        for cmd in ['exec', 'restart_currentmeter', 'update_dns']:
+        for cmd in ['exec', 'restart_current_meter', 'update_dns']:
             cmd = config['commands'][cmd]
             ok_(SMSCMDDaemon.need_confirm(cmd))
 
