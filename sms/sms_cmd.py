@@ -89,9 +89,10 @@ class SMSCMDDaemon(Daemon):
 
     @staticmethod
     def exectution_command(sms):
+        cmd = sms['command']['cli']
+        active_shell = not isinstance(cmd, list)
         try:
-            cmd = sms['command']['cli']
-            sms['command']['output'] = check_output(cmd, stderr=STDOUT, shell=True).decode("utf-8")
+            sms['command']['output'] = check_output(cmd, stderr=STDOUT, shell=active_shell).decode("utf-8")
         except CalledProcessError as ex:
             if ex.returncode == 127:
                 raise NotExistsCommandException(sms['content'])
