@@ -112,7 +112,7 @@ class TestExecuteCommandKO(SMSIntegrationRunCMDTests):
     sms_received = [{'id': 2, 'number': '+34666666666', 'content': 'exec echo "hola"; exit 1',
                      'execution': 'Hola', 'sms_sent':
                          [call('+34666666666', 'Executing command: echo "hola"; exit 1'),
-                          call('+34666666666', 'Error executed command - exec echo "hola"; exit 1 - Return code: 1')]
+                          call('+34666666666', 'ERROR: None | CMD: echo "hola"; exit 1 | RC: 1')]
                      }]
 
 
@@ -120,12 +120,12 @@ class TestExecuteCommandNotExists(SMSIntegrationRunCMDTests):
     sms_received = [{'id': 3, 'number': '+34666666666', 'content': 'exec lsaa',
                      'execution': 'Hola', 'sms_sent':
                          [call('+34666666666', 'Executing command: lsaa'),
-                          call('+34666666666', 'Not exists command exec lsaa')]
+                          call('+34666666666', 'ERROR: None | CMD: lsaa | RC: 127')]
                      }]
 
 
 class TestUnathorizedNumber(SMSIntegrationRunCMDTests):
-    sms_received = [{'id': 4, 'number': '+34666666667', 'content': 'restart_currentmeter',
+    sms_received = [{'id': 4, 'number': '+34666666667', 'content': 'restart_current_meter',
                      'sms_sent':
                          [call('+34666666666', 'Unauthorized phone number +34666666667')]
                      }]
@@ -146,12 +146,12 @@ class TestAllSMSRunCMD(SMSIntegrationRunCMDTests):
                     {'id': 2, 'number': '+34666666666', 'content': 'exec echo "hola"; exit 1',
                      'execution': 'Hola', 'sms_sent':
                          [call('+34666666666', 'Executing command: echo "hola"; exit 1'),
-                          call('+34666666666', 'Error executed command - exec echo "hola"; exit 1 - Return code: 1')]
+                          call('+34666666666', 'ERROR: None | CMD: echo "hola"; exit 1 | RC: 1')]
                      },
                     {'id': 3, 'number': '+34666666666', 'content': 'exec lsaa',
                      'execution': 'Hola', 'sms_sent':
                          [call('+34666666666', 'Executing command: lsaa'),
-                          call('+34666666666', 'Not exists command exec lsaa')]
+                          call('+34666666666', 'ERROR: None | CMD: lsaa | RC: 127')]
                      },
                     {'id': 4, 'number': '+34666666667', 'content': 'restart_currentmeter',
                      'sms_sent':
