@@ -46,10 +46,11 @@ class NotExistsCommandException(SMSExceptionBase):
 
 
 class NotExecutionCommand(SMSExceptionBase):
-    def __init__(self, command: str, code):
-        SMSExceptionBase.__init__(self, message="Error executed command - {command} - Return code: {code}")
+    def __init__(self, command: str, code, error: str):
+        SMSExceptionBase.__init__(self, message="ERROR: {error} | CMD: {command} | RC: {code}")
         self.command = command
         self.code = code
+        self.error = error
 
 
 class SMSCMDDaemon(Daemon):
@@ -94,10 +95,7 @@ class SMSCMDDaemon(Daemon):
         try:
             sms['command']['output'] = check_output(cmd, stderr=STDOUT, shell=active_shell).decode("utf-8")
         except CalledProcessError as ex:
-            if ex.returncode == 127:
-                raise NotExistsCommandException(sms['content'])
-            else:
-                raise NotExecutionCommand(sms['content'], code=ex.returncode)
+            raise NotExecutionCommand(command=ex.cmd, code=ex.returncode, error=ex.stderr)
 
     def get_sms_unread(self):
         import vodem.simple

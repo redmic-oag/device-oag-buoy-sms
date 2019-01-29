@@ -12,42 +12,42 @@ commands:
         msg:
             started: 'Rebooting modem'
             error: 'Error rebooting modem'
-        cli: ['reboot-dongle']
+        cli: 'reboot-dongle'
     reboot_computer:
         msg:
             started: 'Rebooting computer: {command_cli}'
             error: 'Error rebooting computer'
-        cli: ['systemctl', 'reboot']
+        cli: 'systemctl reboot'
     update_dns:
         msg:
             started: 'Updating DNS: {command_cli}'
             finished: 'DNS updated'
             error: 'Error updating DNS'
-        cli: ['systemctl', 'restart', 'ddclient']
+        cli: 'systemctl restart ddclient'
     reset_reverse_ssh:
         msg:
             started: 'Reset reverse ssh: {command_cli}'
             finished: 'Reverse ssh restarted'
             error: 'Error resetting reverse ssh'
-        cli: ['systemctl', 'restart', 'reverse-ssh']
+        cli: 'systemctl restart reverse-ssh'
     restart_weather_station:
         msg:
             started: 'Restarting daemon weather-station: {command_cli}'
             error: 'Error restarting daemon weather-station'
             finished: 'Daemon weather-station restarted'
-        cli: ['systemctl', 'restart', 'weather-station.service']
+        cli: 'systemctl restart weather-station.service'
     restart_current_meter:
         msg:
             started: 'Restarting daemon current-meter: {command_cli}'
             error: 'Error restarting daemon current-meter'
             finished: 'Daemon current-meter restarted'
-        cli: ['systemctl', 'restart', 'current-meter.service']
+        cli: 'systemctl restart current-meter.service'
     public_ip:
         msg:
             started: 'Getting public IP: {command_cli}'
             finished: 'Public IP: {command_output}'
             error: 'Error getting public IP'
-        cli: ['public-ip']
+        cli: 'public-ip'
     exec:
         msg:
             started: 'Executing command: {command_cli}'
