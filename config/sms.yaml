@@ -15,26 +15,26 @@ commands:
         cli: ['reboot-dongle']
     reboot_computer:
         msg:
-            started: 'Rebooting computer - {command_cli}'
+            started: 'Rebooting computer: {command_cli}'
             error: 'Error rebooting computer'
         cli: ['systemctl', 'reboot']
     update_dns:
         msg:
-            started: 'Updating DNS - {command_cli}'
+            started: 'Updating DNS: {command_cli}'
             finished: 'DNS updated'
             error: 'Error updating DNS'
         cli: ['systemctl', 'restart', 'ddclient']
     public_ip:
         msg:
-            started: 'Getting public IP: - {command_cli}'
+            started: 'Getting public IP: {command_cli}'
             finished: 'Public IP: {command_output}'
             error: 'Error getting public IP'
         cli: ['public-ip']
     reset_reverse_ssh:
         msg:
-            started: 'Reset reverse ssh - {command_cli}'
+            started: 'Reset reverse SSH: {command_cli}'
             finished: 'Reverse ssh restarted'
-            error: 'Error resetting reverse ssh'
+            error: 'Error resetting reverse SSH'
         cli: ['systemctl', 'restart', 'reverse-ssh']
     restart_weather_station:
         msg:
@@ -42,14 +42,14 @@ commands:
             error: 'Error restarting daemon weather-station'
             finished: 'Daemon weather-station restarted'
         cli: ['systemctl', 'restart', 'weather-station.service']
-    restart_currentmeter:
+    restart_current_meter:
         msg:
-            started: 'Restarting daemon currentmeter: {command_cli}'
-            error: 'Error restarting daemon currentmeter'
-            finished: 'Daemon currentemeter restarted'
+            started: 'Restarting daemon current-meter: {command_cli}'
+            error: 'Error restarting daemon current-meter'
+            finished: 'Daemon current-meter restarted'
         cli: ['systemctl', 'restart', 'current-meter.service']
     exec:
         msg:
-            started: 'Executing command - {command_cli}'
-            finished: 'Command executed - {command_output}'
-            error: 'Error executing command - {command_cli}'
+            started: 'Executing command: {command_cli}'
+            finished: 'Command executed: {command_output}'
+            error: 'Error executing command: {command_cli}'
